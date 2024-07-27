@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="choreonoid_ros" exec="choreonoid" args="--start-simulation
+   $(find-pkg-share choreonoid_ros2_sample_drone_tutorial)/project/sample_drone.cnoid" />
+</launch>
