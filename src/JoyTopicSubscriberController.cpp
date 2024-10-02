@@ -16,7 +16,9 @@ class JoyTopicSubscriberController : public cnoid::SimpleController, public cnoi
 public:
     virtual bool configure(cnoid::SimpleControllerConfig* config) override;
     virtual bool initialize(cnoid::SimpleControllerIO* io) override;
+    virtual bool start() override;
     virtual bool control() override;
+    virtual void stop() override;
     virtual void unconfigure() override;
 
     virtual int numAxes() const override;
@@ -35,16 +37,45 @@ private:
     std::unique_ptr<rclcpp::executors::StaticSingleThreadedExecutor> executor;
     std::thread executorThread;
     std::mutex commandMutex;
+    std::string topic_name;
+    std::string controller_name;
 };
 
 CNOID_IMPLEMENT_SIMPLE_CONTROLLER_FACTORY(JoyTopicSubscriberController)
 
 bool JoyTopicSubscriberController::configure(cnoid::SimpleControllerConfig* config)
 {
-    node = std::make_shared<rclcpp::Node>(config->controllerName());
+    controller_name = config->controllerName();
+    return true;
+}
+
+bool JoyTopicSubscriberController::initialize(cnoid::SimpleControllerIO* io)
+{
+    this->io = io;
+    sharedJoystick = io->getOrCreateSharedObject<cnoid::SharedJoystick>("joystick");
+    sharedJoystick->setJoystick(this);
+    topic_name.clear();
+    bool is_topic = false;
+    for(auto opt : io->options()) {
+        if(opt == "topic") {
+            is_topic = true;
+        } else if(is_topic) {
+            topic_name = opt;
+            break;
+        }
+    }
+    if(topic_name.empty()) {
+        topic_name = "joy";
+    }
+    return true;
+}
+
+bool JoyTopicSubscriberController::start()
+{
+    node = std::make_shared<rclcpp::Node>(controller_name);
 
     subscription = node->create_subscription<sensor_msgs::msg::Joy>(
-        "/joy", 1,
+        topic_name.c_str(), 1,
         [this](const sensor_msgs::msg::Joy::SharedPtr msg){
             std::lock_guard<std::mutex> lock(commandMutex);
             tmpJoyState = *msg;
@@ -57,27 +88,24 @@ bool JoyTopicSubscriberController::configure(cnoid::SimpleControllerConfig* conf
     return true;
 }
 
-bool JoyTopicSubscriberController::initialize(cnoid::SimpleControllerIO* io)
-{
-    this->io = io;
-    sharedJoystick = io->getOrCreateSharedObject<cnoid::SharedJoystick>("joystick");
-    sharedJoystick->setJoystick(this);
-    return true;
-}
-
 bool JoyTopicSubscriberController::control()
 {
     return false;
 }
 
-void JoyTopicSubscriberController::unconfigure()
+void JoyTopicSubscriberController::stop()
 {
     if(executor) {
         executor->cancel();
         executorThread.join();
         executor->remove_node(node);
         executor.reset();
-    }
+    }    
+}
+
+void JoyTopicSubscriberController::unconfigure()
+{
+
 }
 
 int JoyTopicSubscriberController::numAxes() const
