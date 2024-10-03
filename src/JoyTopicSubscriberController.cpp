@@ -1,7 +1,7 @@
 /**
     Joy Topic Subscriber Controller
     @author Kenta Suzuki
- */
+*/
 
 #include <cnoid/SimpleController>
 #include <cnoid/SharedJoystick>
