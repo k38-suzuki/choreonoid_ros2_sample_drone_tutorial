@@ -35,6 +35,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(choreonoid_joy_node src/choreonoid_joy_node.cpp)
+set_target_properties(choreonoid_joy_node PROPERTIES OUTPUT_NAME node PREFIX "")
 target_link_libraries(choreonoid_joy_node Choreonoid::CnoidUtil)
 ament_target_dependencies(choreonoid_joy_node rclcpp sensor_msgs choreonoid)
 
