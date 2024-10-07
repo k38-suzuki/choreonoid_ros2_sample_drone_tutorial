@@ -53,15 +53,9 @@ links:
             translation: [ -0.02, 0, 0 ]
             geometry: { type: Cone, height: 0.04, radius: 0.025 }
             appearance: { material: { diffuseColor: [ 1.0, 1.0, 0.4 ] } }
-      -
-        type: RateGyroSensor
-        name: GyroSensor
-        maxAngularVelocity: 1000.0
-      -
-        type: AccelerationSensor
-        name: AccSensor
-        max_acceleration: [ 1000.0, 1000.0, 1000.0 ]
-  -
+      - { type: RateGyroSensor, name: GyroSensor, maxAngularVelocity: 1000.0 }
+      - { type: AccelerationSensor, name: AccSensor, max_acceleration: [ 1000.0, 1000.0, 1000.0 ] }
+  - &rotor_link
     name: ROTOR_RF
     parent: CHASSIS
     translation: [ 0.1, -0.1, 0.055 ]
@@ -70,58 +64,27 @@ links:
     mass: 0.03
     inertia: [ 1.98e-05, 0, 0, 0, 1.98e-05, 0, 0, 0, 3.75e-05 ]
     elements:
-      - &FrontRotorShape
+      - &rotor_shape
         type: Shape
         rotation: [ 1, 0, 0, -90 ]
         geometry: { type: Cylinder, radius: 0.05, height: 0.02 }
-        appearance: { material: { diffuse: [ 0, 1, 0 ] } }
-      -
-        type: Rotor
-        name: Rotor_RF
-        symbol: false
-  -
+        appearance: &green { material: { diffuse: [ 0, 1, 0 ] } }
+      - &rotor_device { type: Rotor, name: Rotor_RF, symbol: false }
+  - <<: *rotor_link
     name: ROTOR_LF
-    parent: CHASSIS
     translation: [ 0.1, 0.1, 0.055 ]
-    joint_type: fixed
-    center_of_mass: [ 0, 0, 0 ]
-    mass: 0.03
-    inertia: [ 1.98e-05, 0, 0, 0, 1.98e-05, 0, 0, 0, 3.75e-05 ]
     elements:
-      - *FrontRotorShape
-      -
-        type: Rotor
-        name: Rotor_LF
-        symbol: false
-  -
+      - { <<: *rotor_shape, appearance: *green }
+      - { <<: *rotor_device, name: Rotor_LF }
+  - <<: *rotor_link
     name: ROTOR_LR
-    parent: CHASSIS
     translation: [ -0.1, 0.1, 0.055 ]
-    joint_type: fixed
-    center_of_mass: [ 0, 0, 0 ]
-    mass: 0.03
-    inertia: [ 1.98e-05, 0, 0, 0, 1.98e-05, 0, 0, 0, 3.75e-05 ]
     elements:
-      - &RearRotorShape
-        type: Shape
-        rotation: [ 1, 0, 0, -90 ]
-        geometry: { type: Cylinder, radius: 0.05, height: 0.02 }
-        appearance: { material: { diffuse: [ 1, 0, 0 ] } }
-      -
-        type: Rotor
-        name: Rotor_LR
-        symbol: false
-  -
+      - { <<: *rotor_shape, appearance: &red { material: { diffuse: [ 1, 0, 0 ] } } }
+      - { <<: *rotor_device, name: Rotor_LR }
+  - <<: *rotor_link
     name: ROTOR_RR
-    parent: CHASSIS
     translation: [ -0.1, -0.1, 0.055 ]
-    joint_type: fixed
-    center_of_mass: [ 0, 0, 0 ]
-    mass: 0.03
-    inertia: [ 1.98e-05, 0, 0, 0, 1.98e-05, 0, 0, 0, 3.75e-05 ]
     elements:
-      - *RearRotorShape
-      -
-        type: Rotor
-        name: Rotor_RR
-        symbol: false
+      - { <<: *rotor_shape, appearance: *red }
+      - { <<: *rotor_device, name: Rotor_RR }
